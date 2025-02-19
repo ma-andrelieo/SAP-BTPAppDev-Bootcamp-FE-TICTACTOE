@@ -1,0 +1,60 @@
+
+import React, { useState } from 'react';
+import Board from './Board';
+
+const Game: React.FC = () => {
+    const [board, setBoard] = useState(Array(9).fill(''));
+    const [xIsNext, setXIsNext] = useState(true);
+    const [status, setStatus] = useState('');
+
+    const handleClick = (i: number) => {
+        const newBoard = board.slice();
+        if (checkWin(newBoard).winner || newBoard[i]) {
+            return;
+        }
+        newBoard[i] = xIsNext ? 'X' : 'O';
+        setBoard(newBoard);
+        setXIsNext(!xIsNext);
+
+    };
+
+    const handleReset = () => {
+        setBoard(Array(9).fill(''));
+        setXIsNext(true);
+    };
+
+    const { winner, isDraw, winningSquares } = checkWin(board);
+
+    return (
+        <div className="flex flex-col items-center">
+            <div className="mb-4 text-xl">{status}</div>
+            <Board squares={board} onClick={handleClick} winningSquares={winningSquares} />
+            <button
+                className="mt-4 px-4 py-2 text-blue-500 bg-gray-200 border border-blue-500 rounded"
+                onClick={handleReset}
+            >
+                RESET
+            </button>
+            <div className="mt-4 text-sm">{winner && `Player ${winner} wins!`}</div>
+        </div>
+    );
+};
+
+function checkWin(squares: Array<string | null>): { winner: string | null, isDraw: boolean, winningSquares: number[] } {
+    const lines = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+    ];
+
+    for (const [a, b, c] of lines) {
+        if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+            return { winner: squares[a], isDraw: false, winningSquares: [a, b, c] };
+        }
+    }
+
+    const isDraw = squares.every(square => square !== '');
+    return { winner: null, isDraw, winningSquares: [] };
+}
+
+export default Game;
